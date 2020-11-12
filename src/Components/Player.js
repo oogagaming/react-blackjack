@@ -1,30 +1,44 @@
 import { Button } from '@material-ui/core';
 import React, { useEffect, useState } from 'react'
+import './Player.css'
 
 export function Player(props) {
-    const [cards, setCards] = useState([]);
-    
-    useEffect(() => {
 
-    }, [])
-
-    function RandomCard() {
-        console.log("player: ",props.deck)
-
-        setCards(oldArray => [...oldArray, props.deck.pop()])
-    }
-
-    console.log(cards)
-    const listItems = cards.map((card) =>
-        <h1>{card.suit}{card.rank}</h1>
+    const listItems = props.deck.map((card) =>
+        <h1 key={Math.random()}>{card.suit}{card.rank}</h1>
     );
 
     
 
     return (
-        <div>
+        <div className="Player">
+            <h1>Player</h1>
+            <h3>{props.win}</h3>
             {listItems}
-            <Button color="primary" onClick={RandomCard}>Deal</Button>
+            <p>{props.total}</p>
+            <Button 
+                variant="contained" 
+                onClick={props.hit} 
+                style={{
+                    borderRadius: 5,
+                    backgroundColor: "#7f5af0",
+                    color: "#fffffe",
+                    width: "5vw",
+                }}
+                >
+                    Hit
+                </Button>
+            <Button 
+                variant="contained" 
+                onClick={props.check} 
+                style={{
+                    borderRadius: 5,
+                    backgroundColor: "#7f5af0",
+                    color: "#fffffe",
+                    width: "5vw",
+                }}
+            >
+            Stand</Button>
         </div>
     )
 }
