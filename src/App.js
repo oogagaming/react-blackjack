@@ -9,6 +9,8 @@ function App() {
   const [started, setStart] = useState(false)
   const [dealer, setDealer] = useState([]);
   const [player, setPlayer] = useState([]);
+  const [gameended , setGameEnd] = useState(false);
+
   const [dealerStatus, setDealerStat] = useState("")
   const [playerStatus, setPlayerStat] = useState("")
 
@@ -25,54 +27,78 @@ function App() {
   })
 
   function Hit() {
-    RandomCard("Player", 1)
+    let x = deck.pop()
+    let y;
+    if (x.rank === "J" || x.rank === "Q" || x.rank === "K") {
+      y = playtotal + 10
+    }else if(x.rank === "A") {
+      y =  playtotal + 11
+    }else {
+      y =  playtotal + x.rank
+    }
+    
+    console.log(y)
+    setPlayer(dealer =>[...dealer, x])
+    if(y > 21) {
+      setPlayerStat("Bust")
+      setDealerStat("Win")
+      setGameEnd(true)
+    }
   }
-
-  function HitDealer() {
-
-  }
-
   const StartDeck = () => {
     const deck = [];
     const ranks = ["A", 2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K"];
     const suits = ['♥', '♦', '♣', '♠'];
-
+    const hidden = false;
     ranks.forEach((rank) => {
         suits.forEach((suit) => {
-            deck.push({rank, suit});
+            deck.push({rank, suit, hidden});
         });
     });
     setDeck(shuffle(deck))
-
+    console.log(deck)
   }
 
-  function RandomCard(where, amount) {
+  function RandomCardDealer(amount) {
 
-    if(where === "Dealer") {
       for(let i = 0; i < amount; i++) {
-        setDealer(dealer => [...dealer, deck.pop()])
+        let x = deck.pop()
+        console.log(x)
+        if (i === 1) {
+          x.hidden = true
+        }
+        console.log(x)
+        setDealer(dealer => [...dealer, x])
         console.log(dealer)
       }
-    }else if(where === "Player") {
-      for(let i = 0; i < amount; i++) {
-        setPlayer(dealer => [...dealer, deck.pop()])
-      }
-    }
   }
 
-  function DealCardToDealer() {
-    if(dealtotal < 17) {
-      RandomCard("Dealer", 1)
-      CheckDealer()
-      CheckWin()
+  function RandomCardPlayer(amount) {
+    for(let i = 0; i < amount; i++) {
+      setPlayer(dealer => [...dealer, deck.pop()])
     }
   }
 
   function StartGame() {
-    RandomCard("Dealer", 2)
+    RandomCardDealer(2)
 
-    RandomCard("Player", 2)
+    RandomCardPlayer(2)
     setStart(true)
+    setGameEnd(false)
+  }
+
+  function PlayAgain() {
+    StartDeck()
+    setDealer([])
+    setPlayer([])
+    setDealerStat()
+    setPlayerStat()
+    RandomCardDealer(2)
+
+    RandomCardPlayer(2)
+    setStart(true)
+    setGameEnd(false)
+    console.log(deck)
   }
 
   const CheckHand = () => {
@@ -109,18 +135,23 @@ function App() {
       switch (dealer[i].rank) {
         case "A":
           total = total + 11
+          console.log(total)
           break;
         case "J":
           total = total + 10
+          console.log(total)
           break;
         case "Q":
           total = total + 10
+          console.log(total)
           break;
         case "K":
           total = total + 10
+          console.log(total)
           break;
 
         default:
+          console.log(dealer[i].rank)
           total = total + dealer[i].rank
           break;
       }
@@ -129,43 +160,69 @@ function App() {
     console.log("check dealer", dealtotal)
   }
 
+  function DealerWin() {
+    console.log("Dealer Win")
+    setDealerStat('Win')
+    setPlayerStat("Lost")
+    setGameEnd(true)
+  }
+
+  function ShowCard() {
+    for (let i = 0; i < dealer.length; i++) {
+      dealer[i].hidden = false
+      
+    }
+  }
+
   function CheckWin() {
 
+    ShowCard()
     console.log(dealer)
 
     if(playtotal === 21) {
       setPlayerStat("Blackjack")
+      setGameEnd(true)
     }else if(dealtotal === 21) {
       setDealerStat("Blackjack")
+      setGameEnd(true)
     }else if(playtotal < 21) {
-        var y = dealtotal
-        while(y < 17) {
-          let x = deck.pop()
-          y = x.rank + y
-          console.log(x)
-          setDealer(dealer =>[...dealer, x])
+      var y = dealtotal
+      while(y < 17) {
+        let x = deck.pop()
+        console.log("rank: ", x.rank)
+        if(x.rank === "K" || x.rank === "Q" || x.rank === "J") {
+          y = y + 10
+        }else if(x.rank === "A") {
+          y = y + 11
+        }else {
+          y = y + x.rank
         }
+        console.log("185", y)
+        setDealer(dealer =>[...dealer, x])
+      }
       if(y > 21) {
           console.log("dealer bust")
           setDealerStat('Bust')
           setPlayerStat("Win")
+          setGameEnd(true)
       }else if(playtotal > y) {
           console.log("hand Win")
           setDealerStat('Lost')
           setPlayerStat("Win")
+          setGameEnd(true)
       }else if (playtotal < y) {
-          console.log("Dealer Win")
-          setDealerStat('Win')
-          setPlayerStat("Lost")
+          DealerWin()
       }else if(playtotal === y) {
         setDealerStat('Draw')
         setPlayerStat("Draw")
+        setGameEnd(true)
       }
     }else {
       setPlayerStat("Bust")
       setDealerStat("Win")
+      setGameEnd(true)
     }
-    setTotalDeal(y)
+    CheckDealer()
   }
 
   function shuffle(array) {
@@ -191,9 +248,14 @@ function App() {
     <div className="App">
       <h1>Black Jack</h1>
       {started ? <Dealer deck={dealer} win={dealerStatus} total={dealtotal}/> : null}
-      {started ? <Player deck={player} hit={Hit} check={CheckWin} win={playerStatus} total={playtotal}/> : null}
+      {started ? <Player deck={player} hit={Hit} playagain={PlayAgain} check={CheckWin} win={playerStatus} total={playtotal} gameended={gameended}/> : null}
 
-      {!started ? <Button onClick={StartGame}>Play</Button> : null}
+      {!started ? <Button onClick={StartGame} style={{
+                    borderRadius: 5,
+                    backgroundColor: "#7f5af0",
+                    color: "#fffffe",
+                    width: "5vw",
+                }}>Play</Button> : null}
     </div>
   );
 }

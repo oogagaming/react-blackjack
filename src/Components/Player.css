@@ -4,5 +4,54 @@
 }
 
 .ButtonStand {
-
+    
 }
+
+.Cards {
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    margin: 2px;
+    width: 120px;
+    min-width: 120px;
+}
+
+.Player {
+    color: #fffffe;
+}
+
+.total {
+    color: #94a1b2;
+}
+
+.playAgain {
+
+    display: block; 
+    border-radius: 5px;
+    background-color: #7f5af0;
+    color: #fffffe;
+    width: 210px;
+    height: 36px;
+    margin-left: 1%;
+    margin: auto; 
+    margin-top: 1%;
+    text-transform: uppercase;
+}
+
+@media only screen and (max-width: 600px) {
+    .playAgain {
+
+        display: block; 
+        border-radius: 5px;
+        background-color: #7f5af0;
+        color: #fffffe;
+        width: 135px;
+        height: 36px;
+        margin-left: 1%;
+        margin: auto; 
+        margin-top: 1%;
+        text-transform: uppercase;
+    }
+  }
